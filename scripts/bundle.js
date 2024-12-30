@@ -9,8 +9,35 @@ import { resolve } from "node:path";
 import { readFile } from "node:fs/promises";
 
 export const ENTRY = resolve("src/index.ts");
-
 export async function bundle(options = {}) {
+    options = {
+        entryPoints: [ENTRY],
+        bundle: true,
+        format: "esm",
+        target: "es2022",
+        keepNames: true,
+        sourcemap: false,
+        loader: {
+            ".js": "ts",
+            ".glsl": "text",
+            ".css": "text",
+            ".svg": "text",
+            ".kicad_wks": "text",
+        },
+        define: {
+            DEBUG: "false",
+        },
+        plugins: [CSSMinifyPlugin, ESbuildProblemMatcherPlugin],
+        jsx: "transform",
+        jsxFactory: "h",
+        supported: {
+            "decorators": true
+        },
+        ...options,
+    };
+    return { options: options, context: await esbuild.context(options) };
+}
+/*export async function bundle(options = {}) {
     options = {
         entryPoints: [ENTRY],
         bundle: true,
@@ -33,7 +60,7 @@ export async function bundle(options = {}) {
     };
     return { options: options, context: await esbuild.context(options) };
 }
-
+*/
 // Minify CSS when used with the file loader.
 export const CSSMinifyPlugin = {
     name: "css-minify",
